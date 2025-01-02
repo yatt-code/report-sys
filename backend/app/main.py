@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.api import auth
+from app.api import auth, reports
 
 app = FastAPI(
     title="Report System",
@@ -20,8 +20,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files for uploads
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_FOLDER), name="uploads")
+
 # Include routers
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(reports.router, prefix=f"{settings.API_V1_STR}/reports", tags=["reports"])
 
 # API routes will be added here
 @app.get("/api/health")
