@@ -57,3 +57,6 @@ uploads/
 # System Files
 .DS_Store
 Thumbs.db
+
+# docs
+docs/
