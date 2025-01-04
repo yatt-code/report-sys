@@ -120,7 +120,7 @@ function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <ReportDetailsPage />
-                    <CommentSection /> {/* Comment Section component */}
+                    {/* <CommentSection /> Comment Section component */}
                   </MainLayout>
                 </ProtectedRoute>
               }

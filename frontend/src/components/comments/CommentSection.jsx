@@ -35,7 +35,7 @@ const CommentSection = ({ reportId }) => {
 
   const fetchComments = async () => {
     try {
-      const response = await fetch(`/api/comments/${reportId}`);
+      const response = await fetch(`/api/${reportId}/comments`);
       const data = await response.json();
       setComments(data);
     } catch (error) {

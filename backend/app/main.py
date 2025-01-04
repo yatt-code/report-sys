@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
-from app.routers import auth, reports, comments
+from app.routers import auth, reports
 from app.core.database import Base, engine
 
 # Create database tables
@@ -33,7 +33,7 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
-app.include_router(comments.router, prefix="/api/comments", tags=["comments"])
+# app.include_router(comments.router, prefix="/api/comments", tags=["comments"])
 
 @app.get("/")
 async def root():
