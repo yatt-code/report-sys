@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -15,8 +15,12 @@ class Comment(Base):
 
     user = relationship("User", back_populates="comments")
     report = relationship("Report", back_populates="comments")
+    
+    # Corrected self-referential relationship
     replies = relationship(
         "Comment",
-        backref=relationship("Comment", remote_side=[id]),
-        cascade="all, delete-orphan"
+        backref="parent_comment",
+        remote_side=[id],
+        cascade="all, delete-orphan",
+        single_parent=True  # fix the cascade issue
     )

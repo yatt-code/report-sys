@@ -1,8 +1,8 @@
+# models/report.py
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from app.core.database import Base
-from app.models.attachment import Attachment
 
 class Report(Base):
     __tablename__ = "reports"
@@ -14,5 +14,5 @@ class Report(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="reports")
-    attachments = relationship("Attachment", back_populates="report", cascade="all, delete-orphan")
-    comments = relationship("Comment", back_populates="report", cascade="all, delete-orphan")
+    attachments = relationship("Attachment", back_populates="report")
+    comments = relationship("Comment", back_populates="report")

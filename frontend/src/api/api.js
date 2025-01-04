@@ -12,18 +12,15 @@ const api = axios.create({
 });
 
 // Add request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
-);
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 // Add response interceptor to handle errors
 api.interceptors.response.use(
@@ -43,14 +40,13 @@ api.interceptors.response.use(
 // Auth API
 export const auth = {
   login: async (credentials) => {
-    const formData = new URLSearchParams();
-    formData.append('username', credentials.username);
-    formData.append('password', credentials.password);
-    
     try {
-      const response = await api.post('/api/auth/login', formData, {
+      const response = await api.post('/api/auth/login', {
+        username: credentials.email,  // Use email as username
+        password: credentials.password
+      }, {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
       });
 
@@ -180,4 +176,3 @@ export const reports = {
   },
 };
 
-export default api;

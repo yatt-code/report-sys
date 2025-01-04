@@ -18,14 +18,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def authenticate_user(db: Session, username: str, password: str) -> Union[User, bool]:
+def authenticate_user(db: Session, username: str, password: str) -> Union[User, None]:
     user = db.query(User).filter(
         (User.email == username) | (User.username == username)
     ).first()
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
+    if not user or not verify_password(password, user.hashed_password):
+        return None
     return user
 
 def create_access_token(*, data: dict, expires_delta: timedelta | None = None) -> str:
@@ -57,10 +55,11 @@ async def get_current_user(
             settings.SECRET_KEY, 
             algorithms=[settings.ALGORITHM]
         )
-        user_id: int = payload.get("sub")
+        user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except JWTError:
+        user_id = int(user_id)  # Convert to int
+    except (JWTError, ValueError):
         raise credentials_exception
     
     user = db.query(User).filter(User.id == user_id).first()

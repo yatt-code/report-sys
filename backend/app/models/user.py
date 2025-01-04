@@ -14,5 +14,5 @@ class User(Base):
     is_superuser = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    reports = relationship("Report", back_populates="user", cascade="all, delete-orphan")
-    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    reports = relationship("Report", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
