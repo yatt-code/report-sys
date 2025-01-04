@@ -17,6 +17,7 @@
     "@uiw/react-md-editor": "^4.0.5",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
     "file-icon-vectors": "^1.0.0",
     "postcss": "^8.4.49",
     "react": "^18.3.1",

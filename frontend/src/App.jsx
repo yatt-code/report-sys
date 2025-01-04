@@ -7,6 +7,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import ReportsListPage from './pages/reports/ReportsListPage';
 import CreateReportPage from './pages/reports/CreateReportPage';
 import ReportDetailsPage from './pages/reports/ReportDetailsPage';
+import CommentSection from './components/comments/CommentSection';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -119,6 +120,7 @@ function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <ReportDetailsPage />
+                    <CommentSection /> {/* Comment Section component */}
                   </MainLayout>
                 </ProtectedRoute>
               }
