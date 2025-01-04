@@ -53,12 +53,15 @@ export const auth = {
         },
       });
       
-      if (response.data.access_token) {
-        localStorage.setItem('token', response.data.access_token);
-      }
-      return response.data;
+      // Store the token
+      const token = response.data.access_token;
+      localStorage.setItem('token', token);
+      
+      // Get user details
+      const user = await auth.me();
+      return user;
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
+      console.error('Login error:', error.response?.data);
       throw error;
     }
   },
