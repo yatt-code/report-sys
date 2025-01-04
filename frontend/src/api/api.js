@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -9,7 +9,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
-  timeout: 10000, // 10 seconds timeout
 });
 
 // Add request interceptor to add auth token
@@ -31,9 +30,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Only redirect to login if we're not already on the login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -47,38 +48,31 @@ export const auth = {
     formData.append('password', credentials.password);
     
     try {
-      const response = await api.post('/auth/login', formData, {
+      const response = await api.post('/api/auth/login', formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       });
-      
-      // Store the token
-      const token = response.data.access_token;
-      localStorage.setItem('token', token);
-      
-      // Get user details
-      const user = await auth.me();
-      return user;
+
+      if (response.data.access_token) {
+        localStorage.setItem('token', response.data.access_token);
+      }
+
+      return response.data;
     } catch (error) {
-      console.error('Login error:', error.response?.data);
+      console.error('Login error:', error);
       throw error;
     }
   },
 
   signup: async (userData) => {
-    try {
-      const response = await api.post('/auth/register', userData);
-      return response.data;
-    } catch (error) {
-      console.error('Signup error:', error.response?.data || error.message);
-      throw error;
-    }
+    const response = await api.post('/api/auth/register', userData);
+    return response.data;
   },
 
   me: async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get('/api/auth/me');
       return response.data;
     } catch (error) {
       console.error('Auth check failed:', error);
@@ -86,22 +80,38 @@ export const auth = {
     }
   },
 
-  logout: () => {
+  logout: async () => {
     localStorage.removeItem('token');
-  }
+  },
 };
 
 // Reports API
 export const reports = {
-  create: async (data) => {
-    const response = await api.post('/reports', data);
+  create: async ({ title, content, files }) => {
+    // Send report data as JSON
+    const response = await api.post('/api/reports', {
+      title,
+      content,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // If there are files, upload them separately
+    if (files?.length) {
+      await Promise.all(
+        files.map(file => reports.uploadAttachment(response.data.id, file))
+      );
+    }
+
     return response.data;
   },
 
   list: async (page = 1, limit = 10, search = '') => {
-    const response = await api.get('/reports', {
+    const response = await api.get('/api/reports', {
       params: { 
-        skip: (page - 1) * limit, 
+        skip: (page - 1) * limit,
         limit,
         search 
       }
@@ -110,28 +120,41 @@ export const reports = {
   },
 
   get: async (id) => {
-    const response = await api.get(`/reports/${id}`);
+    const response = await api.get(`/api/reports/${id}`);
     return response.data;
   },
 
-  update: async (id, data) => {
-    const response = await api.put(`/reports/${id}`, data, {
+  update: async (id, { title, content, files }) => {
+    // Send report data as JSON
+    const response = await api.put(`/api/reports/${id}`, {
+      title,
+      content,
+    }, {
       headers: {
         'Content-Type': 'application/json',
       },
     });
+
+    // Handle file uploads separately if needed
+    if (files?.length) {
+      await Promise.all(
+        files.map(file => reports.uploadAttachment(id, file))
+      );
+    }
+
     return response.data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/reports/${id}`);
+    const response = await api.delete(`/api/reports/${id}`);
     return response.data;
   },
 
   uploadInlineImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post('/reports/upload-inline', formData, {
+    
+    const response = await api.post('/api/reports/upload-inline', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -142,7 +165,8 @@ export const reports = {
   uploadAttachment: async (reportId, file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/reports/${reportId}/attachments`, formData, {
+    
+    const response = await api.post(`/api/reports/${reportId}/attachments`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -151,9 +175,9 @@ export const reports = {
   },
 
   deleteAttachment: async (reportId, attachmentId) => {
-    const response = await api.delete(`/reports/${reportId}/attachments/${attachmentId}`);
+    const response = await api.delete(`/api/reports/${reportId}/attachments/${attachmentId}`);
     return response.data;
-  }
+  },
 };
 
 export default api;

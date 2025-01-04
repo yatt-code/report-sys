@@ -114,14 +114,26 @@ async def delete_attachment(
 async def get_reports(
     skip: int = 0,
     limit: int = 10,
+    search: str = "",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """Get all reports for the current user."""
-    total = db.query(Report).filter(Report.user_id == current_user.id).count()
-    reports = db.query(Report).filter(
-        Report.user_id == current_user.id
-    ).offset(skip).limit(limit).all()
+    print(f"Getting reports for user {current_user.id} with skip={skip}, limit={limit}, search={search}")
+    
+    query = db.query(Report).filter(Report.user_id == current_user.id)
+    if search:
+        query = query.filter(Report.title.ilike(f"%{search}%"))
+    
+    # Get total before pagination
+    total = query.count()
+    
+    # Add sorting by created_at in descending order (newest first)
+    reports = query.order_by(Report.created_at.desc()).offset(skip).limit(limit).all()
+    
+    print(f"Found {len(reports)} reports, total: {total}")
+    for report in reports:
+        print(f"Report {report.id}: {report.title} (created at {report.created_at})")
     
     return {
         "items": reports,
@@ -154,6 +166,8 @@ async def create_report(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new report."""
+    print(f"Creating report for user {current_user.id}: {report.title}")
+    
     db_report = Report(
         title=report.title,
         content=report.content,
@@ -162,6 +176,8 @@ async def create_report(
     db.add(db_report)
     db.commit()
     db.refresh(db_report)
+    
+    print(f"Created report with ID {db_report.id}")
     return db_report
 
 @router.put("/{report_id}", response_model=ReportResponse)
