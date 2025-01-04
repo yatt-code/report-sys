@@ -4,6 +4,9 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import MainLayout from './components/layout/MainLayout';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ReportsListPage from './pages/reports/ReportsListPage';
+import CreateReportPage from './pages/reports/CreateReportPage';
+import ReportDetailsPage from './pages/reports/ReportDetailsPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -83,7 +86,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <div>Dashboard (Coming Soon)</div>
+                    <ReportsListPage />
                   </MainLayout>
                 </ProtectedRoute>
               }
@@ -93,7 +96,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <div>Reports List (Coming Soon)</div>
+                    <ReportsListPage />
                   </MainLayout>
                 </ProtectedRoute>
               }
@@ -103,7 +106,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <div>New Report (Coming Soon)</div>
+                    <CreateReportPage />
                   </MainLayout>
                 </ProtectedRoute>
               }
@@ -113,7 +116,7 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MainLayout>
-                    <div>Report Details (Coming Soon)</div>
+                    <ReportDetailsPage />
                   </MainLayout>
                 </ProtectedRoute>
               }

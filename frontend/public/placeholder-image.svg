@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100" height="100" rx="8" fill="#F3F4F6"/>
+  
+  <!-- Image icon -->
+  <path d="M30 25C27.2386 25 25 27.2386 25 30V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V30C75 27.2386 72.7614 25 70 25H30ZM23 30C23 26.134 26.134 23 30 23H70C73.866 23 77 26.134 77 30V70C77 73.866 73.866 77 70 77H30C26.134 77 23 73.866 23 70V30Z" fill="#9CA3AF"/>
+  
+  <!-- Mountain -->
+  <path d="M35 55L45 40L55 55H35Z" fill="#9CA3AF"/>
+  
+  <!-- Larger Mountain -->
+  <path d="M45 65L60 40L75 65H45Z" fill="#9CA3AF"/>
+  
+  <!-- Sun -->
+  <circle cx="40" cy="35" r="5" fill="#9CA3AF"/>
+</svg>

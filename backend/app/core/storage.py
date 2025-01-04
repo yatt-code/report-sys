@@ -6,7 +6,7 @@ from app.core.config import settings
 
 def get_upload_path() -> str:
     """Get the upload directory path and create it if it doesn't exist."""
-    upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), settings.UPLOAD_FOLDER)
+    upload_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), settings.UPLOAD_DIR)
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
     return upload_dir
@@ -48,5 +48,6 @@ def delete_upload_file(file_path: str) -> bool:
                 else:
                     break
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Error deleting file: {e}")
         return False

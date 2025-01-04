@@ -1,54 +1,44 @@
 from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field
-from app.schemas.auth import User
 
-class AttachmentBase(BaseModel):
-    filename: str
-    content_type: str
-
-class AttachmentCreate(AttachmentBase):
-    pass
-
-class Attachment(AttachmentBase):
-    id: int
-    report_id: int
-    file_path: str
-    uploaded_at: datetime
-
-    class Config:
-        from_attributes = True
+from .user import UserResponse
+from .attachment import AttachmentResponse
 
 class ReportBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=255)
-    content: str = Field(..., min_length=1)
+    """Base schema for report data"""
+    title: str
+    content: str
 
 class ReportCreate(ReportBase):
+    """Schema for creating a new report"""
     pass
 
 class ReportUpdate(BaseModel):
-    title: Optional[str] = Field(None, min_length=1, max_length=255)
-    content: Optional[str] = None
+    """Schema for updating an existing report"""
+    title: str
+    content: str
 
-class Report(ReportBase):
+class ReportResponse(BaseModel):
+    """Schema for report response data"""
     id: int
     user_id: int
+    title: str
+    content: str
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    attachments: List[Attachment] = []
+    user: Optional[UserResponse] = None
+    attachments: List[AttachmentResponse] = []
 
     class Config:
         from_attributes = True
 
-class ReportWithUser(Report):
-    user: User
-
-    class Config:
-        from_attributes = True
-
-class ReportList(BaseModel):
+class ReportListResponse(BaseModel):
+    """Schema for paginated report list response"""
+    items: List[ReportResponse]
     total: int
-    items: List[ReportWithUser]
+    page: int
+    size: int
+    pages: int
 
     class Config:
         from_attributes = True

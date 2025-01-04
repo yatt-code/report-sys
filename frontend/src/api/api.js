@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -9,6 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  timeout: 10000, // 10 seconds timeout
 });
 
 // Add request interceptor to add auth token
@@ -30,11 +31,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Handle unauthorized access
       localStorage.removeItem('token');
-      // Only redirect to login if we're not already on the login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -42,10 +41,10 @@ api.interceptors.response.use(
 
 // Auth API
 export const auth = {
-  login: async (email, password) => {
+  login: async (credentials) => {
     const formData = new URLSearchParams();
-    formData.append('username', email);
-    formData.append('password', password);
+    formData.append('username', credentials.username);
+    formData.append('password', credentials.password);
     
     try {
       const response = await api.post('/auth/login', formData, {
@@ -64,9 +63,14 @@ export const auth = {
     }
   },
 
-  register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+  signup: async (userData) => {
+    try {
+      const response = await api.post('/auth/register', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Signup error:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
   me: async () => {
@@ -79,17 +83,25 @@ export const auth = {
     }
   },
 
-  logout: async () => {
+  logout: () => {
     localStorage.removeItem('token');
-    return { success: true };
-  },
+  }
 };
 
 // Reports API
 export const reports = {
-  list: async ({ page = 1, limit = 10, search = '' }) => {
+  create: async (data) => {
+    const response = await api.post('/reports', data);
+    return response.data;
+  },
+
+  list: async (page = 1, limit = 10, search = '') => {
     const response = await api.get('/reports', {
-      params: { skip: (page - 1) * limit, limit, search },
+      params: { 
+        skip: (page - 1) * limit, 
+        limit,
+        search 
+      }
     });
     return response.data;
   },
@@ -99,35 +111,10 @@ export const reports = {
     return response.data;
   },
 
-  create: async ({ title, content, files }) => {
-    const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
-    if (files?.length) {
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-    }
-    const response = await api.post('/reports', formData, {
+  update: async (id, data) => {
+    const response = await api.put(`/reports/${id}`, data, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  update: async (id, { title, content, files }) => {
-    const formData = new FormData();
-    if (title) formData.append('title', title);
-    if (content) formData.append('content', content);
-    if (files?.length) {
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-    }
-    const response = await api.put(`/reports/${id}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     });
     return response.data;
@@ -141,7 +128,6 @@ export const reports = {
   uploadInlineImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
     const response = await api.post('/reports/upload-inline', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
