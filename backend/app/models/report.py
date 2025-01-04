@@ -15,3 +15,4 @@ class Report(Base):
 
     user = relationship("User", back_populates="reports")
     attachments = relationship("Attachment", back_populates="report", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="report", cascade="all, delete-orphan")
