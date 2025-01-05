@@ -167,4 +167,39 @@ export const reports = {
   }
 };
 
+// Comments API
+export const comments = {
+  // Fetch comments for a specific report
+  list: async (reportId, { skip = 0, limit = 50 } = {}) => {
+    const response = await api.get(`/comments/report/${reportId}`, {
+      params: { skip, limit },
+    });
+    return response.data;
+  },
+
+  // Add a new comment to a report
+  create: async ({ content, reportId, parentId = null }) => {
+    const response = await api.post('/comments', {
+      content,
+      report_id: reportId,
+      parent_id: parentId,
+    });
+    return response.data;
+  },
+
+  // Update an existing comment
+  update: async (commentId, { content }) => {
+    const response = await api.put(`/comments/${commentId}`, { content });
+    return response.data;
+  },
+
+  // Delete a comment
+  delete: async (commentId) => {
+    const response = await api.delete(`/comments/${commentId}`);
+    return response.data;
+  },
+};
+
+
+
 export default api;

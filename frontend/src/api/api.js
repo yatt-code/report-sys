@@ -176,3 +176,22 @@ export const reports = {
   },
 };
 
+// Comments API
+export const comments = {
+  list: async (reportId) => {
+    const response = await api.get(`/reports/${reportId}/comments`);
+    return response.data;
+  },
+
+  create: async (reportId, { parentId, content }) => {
+    const response = await api.post(`/reports/${reportId}/comments`, {
+      parentId,
+      content,
+    });
+    return response.data;
+  },
+};
+
+
+
+

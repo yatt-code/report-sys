@@ -12,6 +12,7 @@ import {
 import { reports } from '../../services/api';
 import AttachmentList from '../../components/reports/AttachmentList';
 import { useDropzone } from 'react-dropzone';
+import CommentsListPage from '../comments/CommentsListPage';
 
 export default function ReportDetailsPage() {
   const { id } = useParams();
@@ -44,31 +45,17 @@ export default function ReportDetailsPage() {
     mutationFn: async (data) => {
       try {
         let content = data.content;
-        console.log("Original content length:", content.length);
-        console.log("Content preview:", content.substring(0, 200));
-        
-        // Process inline images if there are any blob URLs
         if (content.includes('blob:')) {
           content = await processInlineImages(content);
-          console.log("Content after image processing length:", content.length);
-          console.log("Processed content preview:", content.substring(0, 200));
         }
-        
+
         const updateData = {
           title: data.title,
-          content: content
+          content: content,
         };
-        
-        console.log("Final update data:", {
-          titleLength: updateData.title.length,
-          contentLength: updateData.content.length,
-          contentPreview: updateData.content.substring(0, 200)
-        });
-        
+
         return reports.update(id, updateData);
       } catch (error) {
-        console.error("Error in mutation:", error);
-        console.error("Error response:", error.response?.data);
         throw error;
       }
     },
@@ -79,12 +66,6 @@ export default function ReportDetailsPage() {
       setDeletedAttachments([]);
     },
     onError: (error) => {
-      console.error("Update error full details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
       const errorDetail = error.response?.data?.detail;
       if (errorDetail?.error) {
         setError(`Error: ${errorDetail.error} (${errorDetail.type})`);
@@ -109,16 +90,12 @@ export default function ReportDetailsPage() {
 
   const handleSave = async () => {
     try {
-      console.log('Saving with content:', editedContent);
       await updateMutation.mutateAsync({
         title,
         content: editedContent,
       });
     } catch (error) {
       console.error('Failed to save report:', error);
-      if (error.response?.data) {
-        console.error('Validation error details:', error.response.data);
-      }
     }
   };
 
@@ -131,22 +108,14 @@ export default function ReportDetailsPage() {
   };
 
   const processInlineImages = async (content) => {
-    if (!content) {
-      console.log('No content to process');
-      return '';
-    }
-    
+    if (!content) return '';
+
     const regex = /!\[.*?\]\((blob:.*?)\)/g;
     const matches = content.match(regex);
-    
-    if (!matches) {
-      console.log('No blob URLs found in content');
-      return content;
-    }
-    
-    console.log('Found blob URLs:', matches);
+
+    if (!matches) return content;
+
     let processedContent = content;
-    
     for (const match of matches) {
       try {
         const blobUrl = match.match(/\((blob:.*?)\)/)[1];
@@ -159,8 +128,7 @@ export default function ReportDetailsPage() {
         console.error('Failed to process image:', error);
       }
     }
-    
-    console.log('Processed content:', processedContent);
+
     return processedContent;
   };
 
@@ -294,6 +262,7 @@ export default function ReportDetailsPage() {
                 />
               </div>
             )}
+            
           </>
         )}
       </div>

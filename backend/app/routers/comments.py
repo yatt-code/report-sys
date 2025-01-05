@@ -61,3 +61,70 @@ async def delete_comment(
     
     comments_crud.delete_comment(db, db_comment)
     return {"message": "Comment deleted"}
+
+# ---------
+
+# # In routers/comments.py
+# from fastapi import APIRouter, Depends, HTTPException
+# from sqlalchemy.orm import Session
+# from typing import List, Any
+
+# router = APIRouter()
+
+# @router.get("/reports/{report_id}/comments", response_model=List[CommentResponse])
+# async def get_report_comments(
+#     report_id: int,
+#     skip: int = 0,
+#     limit: int = 50,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_active_user)
+# ) -> Any:
+#     return comments_crud.get_report_comments(db, report_id, skip, limit)
+
+# @router.post("/reports/{report_id}/comments", response_model=CommentResponse)
+# async def create_comment(
+#     report_id: int,
+#     comment: CommentCreate,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_active_user)
+# ) -> Any:
+#     # Ensure report_id in path matches body
+#     if comment.report_id != report_id:
+#         raise HTTPException(status_code=400, detail="Report ID mismatch")
+#     return comments_crud.create_comment(db, comment, current_user)
+
+# @router.put("/reports/{report_id}/comments/{comment_id}", response_model=CommentResponse)
+# async def update_comment(
+#     report_id: int,
+#     comment_id: int,
+#     comment: CommentUpdate,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_active_user)
+# ) -> Any:
+#     db_comment = comments_crud.get_comment(db, comment_id)
+#     if not db_comment:
+#         raise HTTPException(status_code=404, detail="Comment not found")
+#     if db_comment.report_id != report_id:
+#         raise HTTPException(status_code=400, detail="Comment does not belong to this report")
+#     if db_comment.user_id != current_user.id:
+#         raise HTTPException(status_code=403, detail="Not authorized to update this comment")
+    
+#     return comments_crud.update_comment(db, db_comment, comment)
+
+# @router.delete("/reports/{report_id}/comments/{comment_id}")
+# async def delete_comment(
+#     report_id: int,
+#     comment_id: int,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_active_user)
+# ) -> Any:
+#     db_comment = comments_crud.get_comment(db, comment_id)
+#     if not db_comment:
+#         raise HTTPException(status_code=404, detail="Comment not found")
+#     if db_comment.report_id != report_id:
+#         raise HTTPException(status_code=400, detail="Comment does not belong to this report")
+#     if db_comment.user_id != current_user.id:
+#         raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
+    
+#     comments_crud.delete_comment(db, db_comment)
+#     return {"message": "Comment deleted"}
