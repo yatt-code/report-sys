@@ -171,7 +171,7 @@ export const reports = {
 export const comments = {
   // Fetch comments for a specific report
   list: async (reportId, { skip = 0, limit = 50 } = {}) => {
-    const response = await api.get(`/comments/report/${reportId}`, {
+    const response = await api.get(`report/${reportId}`, {
       params: { skip, limit },
     });
     return response.data;
@@ -189,13 +189,13 @@ export const comments = {
 
   // Update an existing comment
   update: async (commentId, { content }) => {
-    const response = await api.put(`/comments/${commentId}`, { content });
+    const response = await api.put(`${commentId}`, { content });
     return response.data;
   },
 
   // Delete a comment
   delete: async (commentId) => {
-    const response = await api.delete(`/comments/${commentId}`);
+    const response = await api.delete(`${commentId}`);
     return response.data;
   },
 };
