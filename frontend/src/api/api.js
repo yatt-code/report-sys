@@ -179,13 +179,16 @@ export const reports = {
 // Comments API
 export const comments = {
   list: async (reportId) => {
-    const response = await api.get(`/reports/${reportId}/comments`);
+    const response = await api.get(`/api/comments/report/${reportId}`, {
+      params: { skip: 0, limit: 50 },
+    });
     return response.data;
   },
 
   create: async (reportId, { parentId, content }) => {
-    const response = await api.post(`/reports/${reportId}/comments`, {
-      parentId,
+    const response = await api.post(`/api/comments`, {
+      report_id: reportId,
+      parent_id: parentId,
       content,
     });
     return response.data;
