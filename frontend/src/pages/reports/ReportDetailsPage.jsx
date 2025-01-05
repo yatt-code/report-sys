@@ -164,6 +164,7 @@ export default function ReportDetailsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Report Details Section */}
       <div className="bg-white rounded-lg shadow-md p-6">
         {isEditing ? (
           <>
@@ -262,10 +263,16 @@ export default function ReportDetailsPage() {
                 />
               </div>
             )}
-            
           </>
         )}
       </div>
+
+      {/* Conditionally Render Comments Section */}
+      {!isEditing && (
+        <div className="mt-8">
+          <CommentsListPage reportId={report.id} />
+        </div>
+      )}
     </div>
   );
 }

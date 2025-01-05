@@ -7,7 +7,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import ReportsListPage from './pages/reports/ReportsListPage';
 import CreateReportPage from './pages/reports/CreateReportPage';
 import ReportDetailsPage from './pages/reports/ReportDetailsPage';
-import CommentsListPage from './pages/comments/CommentsListPage';
+// import CommentsListPage from './pages/comments/CommentsListPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -120,7 +120,7 @@ function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <ReportDetailsPage />
-                    <CommentsListPage />
+                    {/* <CommentsListPage /> */}
                   </MainLayout>
                 </ProtectedRoute>
               }

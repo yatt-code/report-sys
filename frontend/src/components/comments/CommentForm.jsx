@@ -9,10 +9,16 @@ function CommentForm({ onSubmit }) {
       setError('Comment cannot be empty.');
       return;
     }
-    onSubmit(content).then(() => {
-      setContent('');
-      setError('');
-    });
+    
+    onSubmit({ parentId: null, content })
+      .then(() => {
+        setContent('');
+        setError('');
+      })
+      .catch((error) => {
+        console.error('Failed to submit comment:', error);
+        setError('Failed to submit comment. Please try again.');
+      });
   };
 
   return (

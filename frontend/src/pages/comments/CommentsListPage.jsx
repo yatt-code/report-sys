@@ -8,6 +8,7 @@ function CommentsListPage({ reportId }) {
 
   useEffect(() => {
     const fetchComments = async () => {
+      if (!reportId) return; // Validation check
       try {
         const data = await comments.list(reportId);
         setCommentList(data);
