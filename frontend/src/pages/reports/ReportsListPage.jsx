@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { reports } from '../../api/api';  
+import { reports } from '../../services/api';  
 import ReportCard from '../../components/reports/ReportCard';
 import SearchInput from '../../components/reports/SearchInput';
 

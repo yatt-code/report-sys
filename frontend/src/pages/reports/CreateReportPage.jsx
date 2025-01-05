@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import MDEditor from '@uiw/react-md-editor';
-import { reports } from '../../api/api';
+import { reports } from '../../services/api';
 import FileUpload from '../../components/reports/FileUpload';
 
 export default function CreateReportPage() {
