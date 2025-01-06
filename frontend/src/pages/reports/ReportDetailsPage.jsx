@@ -12,6 +12,7 @@ import {
 import { reports } from '../../services/api';
 import AttachmentList from '../../components/reports/AttachmentList';
 import { useDropzone } from 'react-dropzone';
+import CommentList from '../../components/comments/CommentList';
 
 export default function ReportDetailsPage() {
   const { id } = useParams();
@@ -294,6 +295,10 @@ export default function ReportDetailsPage() {
                 />
               </div>
             )}
+            <div className="mt-8 border-t pt-6">
+              <h2 className="text-lg font-semibold mb-4">Comments</h2>
+              <CommentList reportId={report.id} />
+            </div>
           </>
         )}
       </div>

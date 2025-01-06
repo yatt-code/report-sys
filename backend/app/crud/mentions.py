@@ -2,13 +2,14 @@
 from sqlalchemy.orm import Session
 from app.models.mention import Mention
 from app.schemas.mention import MentionCreate
-from typing import Optional
+from typing import Optional, List
 import re
 
 def extract_mentions(text: str) -> list[str]:
     """Extract usernames from text that are mentioned using @."""
-    pattern = r'@(\w+)'
-    return re.findall(pattern, text)
+    pattern = r'@([\w.-]+)(?:\s|$|[.,!?])'
+    matches = re.findall(pattern, text)
+    return list(dict.fromkeys(matches))
 
 def create_mentions(
     db: Session,
@@ -32,3 +33,15 @@ def create_mentions(
     
     db.commit()
     return mentions
+
+def get_mentions_for_entity(
+    db: Session,
+    report_id: Optional[int] = None,
+    comment_id: Optional[int] = None
+) -> List[Mention]:
+    query = db.query(Mention)
+    if report_id:
+        query = query.filter(Mention.report_id == report_id)
+    if comment_id:
+        query = query.filter(Mention.comment_id == comment_id)
+    return query.all()

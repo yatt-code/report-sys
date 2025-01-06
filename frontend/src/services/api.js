@@ -152,4 +152,34 @@ export const reports = {
   },
 };
 
+// Comments API
+export const comments = {
+  getReportComments: async (reportId, params = {}) => {
+    const response = await api.get(`/api/comments/report/${reportId}`, { params });
+    return response.data;
+  },
+
+  create: async (data) => {
+    const response = await api.post('/api/comments', data);
+    return response.data;
+  },
+
+  update: async (commentId, data) => {
+    const response = await api.put(`/api/comments/${commentId}`, data);
+    return response.data;
+  },
+
+  delete: async (commentId) => {
+    const response = await api.delete(`/api/comments/${commentId}`);
+    return response.data;
+  }
+};
+
+export const users = {
+  search: async (query) => {
+    const response = await api.get('/api/users/search', { params: { q: query } });
+    return response.data;
+  }
+};
+
 export default api;
