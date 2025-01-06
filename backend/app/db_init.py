@@ -1,7 +1,6 @@
-from app.core.database import engine, Base
-from app.models.user import User
-from app.models.report import Report
-from app.models.attachment import Attachment
+from sqlalchemy.orm import Session
+from app.models.base import User, Report
+from app.core.database import SessionLocal
 
 def init_db():
     # Drop all tables

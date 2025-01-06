@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.core.database import SessionLocal, engine
-from app.models.user import User
+from app.models.base import User
+from app.core.database import SessionLocal
 from app.core.auth import get_password_hash
 
 def create_test_user():

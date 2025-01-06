@@ -7,7 +7,7 @@ from app.core.auth import get_current_active_user
 from app.core.storage import save_upload_file
 from app.crud import reports as reports_crud
 from app.crud import mentions as mentions_crud
-from app.models.user import User
+from app.models.base import User
 from app.schemas.report import (
     ReportCreate,
     ReportUpdate,

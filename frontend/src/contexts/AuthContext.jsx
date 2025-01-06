@@ -1,67 +1,77 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { auth } from '../services/api';
 
 const AuthContext = createContext(null);
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!user;
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const userData = await auth.me();
-        setUser(userData);
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    // Check if user is logged in on mount
     const token = localStorage.getItem('token');
     if (token) {
-      checkAuth();
+      auth.me()
+        .then(data => setUser(data))
+        .catch(() => localStorage.removeItem('token'))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, []);
 
   const login = async (email, password) => {
-    // Send email as username to match FastAPI's OAuth2PasswordRequestForm
-    const { access_token } = await auth.login(email, password);
-    localStorage.setItem('token', access_token);
-    const userData = await auth.me();
-    setUser(userData);
-    return userData;
+    try {
+      console.log('Attempting login:', { email });
+      const data = await auth.login(email, password);
+      console.log('Login response:', data);
+      
+      localStorage.setItem('token', data.access_token);
+      
+      console.log('Getting user data...');
+      const userData = await auth.me();
+      console.log('User data:', userData);
+      
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
-  const register = async (userData) => {
-    const newUser = await auth.register(userData);
-    const { access_token } = await auth.login(userData.email, userData.password);
-    localStorage.setItem('token', access_token);
-    setUser(newUser);
-    return newUser;
+  const signup = async (userData) => {
+    try {
+      console.log('Attempting signup:', userData);
+      const data = await auth.signup(userData);
+      console.log('Signup response:', data);
+      
+      // After signup, log them in automatically
+      return login(userData.email, userData.password);
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
-    auth.logout();
+    localStorage.removeItem('token');
     setUser(null);
   };
 
-  const value = {
-    user,
-    login,
-    logout,
-    register,
-    loading,
-    isAuthenticated: !!user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      isAuthenticated,
+      login, 
+      signup, 
+      logout 
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
+
+export const useAuth = () => useContext(AuthContext);

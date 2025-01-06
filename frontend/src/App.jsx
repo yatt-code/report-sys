@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import MainLayout from './components/layout/MainLayout';
@@ -22,7 +22,8 @@ const queryClient = new QueryClient({
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -32,8 +33,8 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return children;

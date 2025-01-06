@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.models.report import Report
-from app.models.user import User
+from app.models.base import User, Report
+from app.core.database import SessionLocal
 from datetime import datetime, timedelta
 import random
 

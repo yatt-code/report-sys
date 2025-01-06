@@ -6,8 +6,8 @@ from app.core.database import get_db
 from app.core.auth import get_current_active_user
 from app.crud import comments as comments_crud
 from app.crud import mentions as mentions_crud
-from app.models.user import User
-from app.schemas.comments import CommentCreate, CommentUpdate, CommentResponse
+from app.models.base import User
+from app.schemas.comment import CommentCreate, CommentUpdate, CommentResponse
 
 router = APIRouter()
 

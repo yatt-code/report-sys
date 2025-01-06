@@ -1,30 +1,38 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setIsLoading(true);
+    setError(null);
 
     const formData = new FormData(e.target);
     const email = formData.get('email');
     const password = formData.get('password');
-
+    
+    console.log('Form submission:', { email });
+    
     try {
-      await login(email, password);
-      navigate('/');
-    } catch (error) {
-      console.error('Login failed:', error);
-      setError('Failed to log in. Please check your credentials.');
+      const userData = await login(email, password);
+      console.log('Login successful:', userData);
+      
+      // Redirect to the page they tried to visit or home
+      const from = location.state?.from?.pathname || "/";
+      console.log('Redirecting to:', from);
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.detail || 'Failed to login');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -97,10 +105,10 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {isLoading ? (
                 <div className="w-5 h-5 border-t-2 border-white rounded-full animate-spin"></div>
               ) : (
                 'Sign in'

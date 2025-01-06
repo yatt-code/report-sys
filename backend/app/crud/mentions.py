@@ -1,6 +1,6 @@
 # app/crud/mentions.py
 from sqlalchemy.orm import Session
-from app.models.mention import Mention
+from app.models.base import Mention, User
 from app.schemas.mention import MentionCreate
 from typing import Optional, List
 import re

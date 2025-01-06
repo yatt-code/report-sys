@@ -5,22 +5,20 @@ from sqlalchemy import desc
 from app.core.database import get_db
 from app.core.auth import get_current_active_user
 from app.core.storage import save_upload_file, delete_upload_file
-from app.models.user import User
-from app.models.report import Report as ReportModel
-from app.models.attachment import Attachment as AttachmentModel
+from app.models.base import User, Report, Attachment  # Updated imports
 from app.schemas.report import (
     ReportCreate,
     ReportUpdate,
-    Report,
+    Report as ReportSchema,
     ReportList
 )
-from app.schemas.attachment import Attachment
+from app.schemas.attachment import Attachment as AttachmentSchema
 import os
 from datetime import datetime
 
 router = APIRouter()
 
-@router.post("", response_model=Report)
+@router.post("", response_model=ReportSchema)
 async def create_report(
     *,
     db: Session = Depends(get_db),
@@ -30,7 +28,7 @@ async def create_report(
     files: List[UploadFile] = File([])
 ) -> Any:
     """Create a new report with optional file attachments."""
-    report = ReportModel(
+    report = Report(
         title=title,
         content=content,
         user_id=current_user.id
@@ -44,7 +42,7 @@ async def create_report(
         for file in files:
             if file.filename:
                 file_path = save_upload_file(file, report.id)
-                attachment = AttachmentModel(
+                attachment = Attachment(
                     filename=file.filename,
                     file_path=file_path,
                     content_type=file.content_type,
@@ -65,24 +63,24 @@ def list_reports(
     search: Optional[str] = None
 ) -> Any:
     """List reports with pagination and optional search."""
-    query = db.query(ReportModel)
+    query = db.query(Report)
     
     # If not superuser, only show own reports
     if not current_user.is_superuser:
-        query = query.filter(ReportModel.user_id == current_user.id)
+        query = query.filter(Report.user_id == current_user.id)
     
     # Apply search filter if provided
     if search:
         search_filter = f"%{search}%"
         query = query.filter(
-            (ReportModel.title.ilike(search_filter)) |
-            (ReportModel.content.ilike(search_filter))
+            (Report.title.ilike(search_filter)) |
+            (Report.content.ilike(search_filter))
         )
     
     total = query.count()
     items = (
         query
-        .order_by(desc(ReportModel.created_at))
+        .order_by(desc(Report.created_at))
         .offset(skip)
         .limit(limit)
         .all()
@@ -90,14 +88,14 @@ def list_reports(
     
     return {"total": total, "items": items}
 
-@router.get("/{report_id}", response_model=Report)
+@router.get("/{report_id}", response_model=ReportSchema)
 def get_report(
     report_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Get a specific report by ID."""
-    report = db.query(ReportModel).filter(ReportModel.id == report_id).first()
+    report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
@@ -107,7 +105,7 @@ def get_report(
     
     return report
 
-@router.put("/{report_id}", response_model=Report)
+@router.put("/{report_id}", response_model=ReportSchema)
 async def update_report(
     *,
     report_id: int,
@@ -118,7 +116,7 @@ async def update_report(
     current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Update a report and optionally add new attachments."""
-    report = db.query(ReportModel).filter(ReportModel.id == report_id).first()
+    report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
@@ -137,7 +135,7 @@ async def update_report(
         for file in files:
             if file.filename:
                 file_path = save_upload_file(file, report.id)
-                attachment = AttachmentModel(
+                attachment = Attachment(
                     filename=file.filename,
                     file_path=file_path,
                     content_type=file.content_type,
@@ -158,7 +156,7 @@ def delete_report(
     """
     Delete a report.
     """
-    report = db.query(ReportModel).filter(ReportModel.id == report_id).first()
+    report = db.query(Report).filter(Report.id == report_id).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
     
@@ -166,7 +164,7 @@ def delete_report(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     # First delete all attachments
-    db.query(AttachmentModel).filter(AttachmentModel.report_id == report_id).delete()
+    db.query(Attachment).filter(Attachment.report_id == report_id).delete()
     
     # Then delete the report
     db.delete(report)
@@ -183,9 +181,9 @@ def delete_attachment(
 ) -> Any:
     """Delete a specific attachment from a report."""
     attachment = (
-        db.query(AttachmentModel)
-        .join(ReportModel)
-        .filter(AttachmentModel.id == attachment_id, ReportModel.id == report_id)
+        db.query(Attachment)
+        .join(Report)
+        .filter(Attachment.id == attachment_id, Report.id == report_id)
         .first()
     )
     

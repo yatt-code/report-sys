@@ -1,24 +1,28 @@
 from fastapi import FastAPI
-
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.routing import APIRoute
 import os
+import logging
 
-
+# Import routers
 from app.routers import auth, reports, comments
 from app.core.database import Base, engine
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # React dev server
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Disposition"]  # Add any other headers you need to expose
+    expose_headers=["*"],
 )
 
 # Create database tables
@@ -36,6 +40,14 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(comments.router, prefix="/api/comments", tags=["comments"])
+
+# Log registered routes
+logger.info("API Routes registered:")
+for route in app.routes:
+    if isinstance(route, APIRoute):
+        logger.info(f"{route.methods} {route.path}")
+    else:
+        logger.info(f"Mount: {route.path}")
 
 @app.get("/")
 async def root():

@@ -1,9 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List, Optional
-from app.models.report import Report
-from app.models.user import User
-from app.models.attachment import Attachment
+from app.models.base import Report, User, Attachment
 from app.schemas.report import ReportCreate, ReportUpdate
 from app.core.storage import save_upload_file, delete_upload_file
 

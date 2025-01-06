@@ -1,34 +1,36 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr, constr
+from typing import Optional, List
+from pydantic import BaseModel, EmailStr, constr, validator
+from app.models.enums import UserRole, Project
 
 class UserBase(BaseModel):
     email: EmailStr
     username: constr(min_length=3, max_length=50)
-    full_name: Optional[str] = None
+    full_name: constr(max_length=255)
+    role: UserRole = UserRole.ANALYST
+
+    @validator('full_name')
+    def validate_full_name(cls, v):
+        name_markers = ['bin', 'binti', 'a/l', 'a/p']
+        if not any(marker in v.lower() for marker in name_markers):
+            raise ValueError(
+                'Full name must contain one of the following: "bin", "binti", "a/l", or "a/p"'
+            )
+        return v
 
 class UserCreate(UserBase):
     password: constr(min_length=8)
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None
+    role: Optional[UserRole] = None
+    projects: Optional[List[Project]] = None
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-
-class TokenPayload(BaseModel):
-    sub: str  # user email
-    exp: int  # expiration time
-
-class User(UserBase):
+class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
+    projects: List[Project] = []
 
     class Config:
         from_attributes = True

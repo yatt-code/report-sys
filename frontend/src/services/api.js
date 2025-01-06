@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-// Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,89 +10,52 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Add request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Add response interceptor to handle errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
+// Add token to requests if it exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
-// Auth API
 export const auth = {
   login: async (email, password) => {
-    try {
-      const payload = new URLSearchParams({
-        username: email,
-        password: password,
-      });
-
-      const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      };
-
-      const response = await api.post('/api/auth/login', payload, { headers });
-
-      if (response.data.access_token) {
-        localStorage.setItem('token', response.data.access_token);
-      }
-      return response.data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', password);
+    
+    const { data } = await api.post('/auth/login', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+    return data;
   },
 
-  register: async (userData) => {
-    const response = await api.post('/api/auth/register', userData);
-    return response.data;
+  signup: async (userData) => {
+    const { data } = await api.post('/auth/signup', userData);
+    return data;
   },
 
   me: async () => {
-    try {
-      const response = await api.get('/api/auth/me');
-      return response.data;
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      throw error;
-    }
-  },
-
-  logout: async () => {
-    localStorage.removeItem('token');
+    const { data } = await api.get('/auth/me');
+    return data;
   },
 };
 
 // Reports API
 export const reports = {
-  list: async ({ page = 1, limit = 10, search = '' }) => {
-    const response = await api.get('/api/reports', {
+  list: async (page = 1, limit = 10, search = '') => {
+    const { data } = await api.get('/reports', {
       params: { skip: (page - 1) * limit, limit, search },
     });
-    return response.data;
+    return data;
   },
 
   get: async (id) => {
-    const response = await api.get(`/api/reports/${id}`);
-    return response.data;
+    const { data } = await api.get(`/reports/${id}`);
+    return data;
   },
 
   create: async ({ title, content, files }) => {
@@ -103,10 +65,10 @@ export const reports = {
     if (files?.length) {
       files.forEach((file) => formData.append('files', file));
     }
-    const response = await api.post('/reports', formData, {
+    const { data } = await api.post('/reports', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
   update: async (id, { title, content, files }) => {
@@ -116,69 +78,69 @@ export const reports = {
     if (files?.length) {
       files.forEach((file) => formData.append('files', file));
     }
-    const response = await api.put(`/api/reports/${id}`, formData, {
+    const { data } = await api.put(`/reports/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
   delete: async (id) => {
-    const response = await api.delete(`/api/reports/${id}`);
-    return response.data;
+    const { data } = await api.delete(`/reports/${id}`);
+    return data;
   },
 
   uploadInlineImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await api.post('/api/reports/upload-inline', formData, {
+    const { data } = await api.post('/reports/upload-inline', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
   uploadAttachment: async (reportId, file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await api.post(`/api/reports/${reportId}/attachments`, formData, {
+    const { data } = await api.post(`/reports/${reportId}/attachments`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data;
+    return data;
   },
 
   deleteAttachment: async (reportId, attachmentId) => {
-    const response = await api.delete(`/api/reports/${reportId}/attachments/${attachmentId}`);
-    return response.data;
+    const { data } = await api.delete(`/reports/${reportId}/attachments/${attachmentId}`);
+    return data;
   },
 };
 
 // Comments API
 export const comments = {
   getReportComments: async (reportId, params = {}) => {
-    const response = await api.get(`/api/comments/report/${reportId}`, { params });
-    return response.data;
+    const { data } = await api.get(`/comments/report/${reportId}`, { params });
+    return data;
   },
 
-  create: async (data) => {
-    const response = await api.post('/api/comments', data);
-    return response.data;
+  create: async (commentData) => {
+    const { data } = await api.post('/comments', commentData);
+    return data;
   },
 
-  update: async (commentId, data) => {
-    const response = await api.put(`/api/comments/${commentId}`, data);
-    return response.data;
+  update: async (commentId, commentData) => {
+    const { data } = await api.put(`/comments/${commentId}`, commentData);
+    return data;
   },
 
   delete: async (commentId) => {
-    const response = await api.delete(`/api/comments/${commentId}`);
-    return response.data;
+    const { data } = await api.delete(`/comments/${commentId}`);
+    return data;
   }
 };
 
 export const users = {
   search: async (query) => {
-    const response = await api.get('/api/users/search', { params: { q: query } });
-    return response.data;
+    const { data } = await api.get('/users/search', { params: { q: query } });
+    return data;
   }
 };
 

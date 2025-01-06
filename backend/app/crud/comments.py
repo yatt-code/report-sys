@@ -2,9 +2,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from typing import List, Optional
 
-from app.models.comment import Comment
-from app.schemas.comments import CommentCreate, CommentUpdate
-from app.models.user import User
+from app.models.base import Comment, User
+from app.schemas.comment import CommentCreate, CommentUpdate
 
 def create_comment(db: Session, comment: CommentCreate, current_user: User) -> Comment:
     """Create a new comment."""
