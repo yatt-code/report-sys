@@ -5,6 +5,7 @@ from typing import List, Any
 from app.core.database import get_db
 from app.core.auth import get_current_active_user
 from app.crud import comments as comments_crud
+from app.crud import mentions as mentions_crud
 from app.models.user import User
 from app.schemas.comments import CommentCreate, CommentUpdate, CommentResponse
 
@@ -17,7 +18,14 @@ async def create_comment(
     current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Create a new comment."""
-    return comments_crud.create_comment(db, comment, current_user)
+    db_comment = comments_crud.create_comment(db, comment, current_user)
+
+    # Handle Mentions
+    mentioned_users = mentions_crud.extract_mentions(comment.content)
+    if mentioned_users:
+        mentions_crud.create_mentions(db, mentioned_users, comment_id=db_comment.id)
+    
+    return db_comment
 
 @router.get("/report/{report_id}", response_model=List[CommentResponse])
 async def get_report_comments(
@@ -44,7 +52,14 @@ async def update_comment(
     if db_comment.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this comment")
     
-    return comments_crud.update_comment(db, db_comment, comment)
+    updated_comment = comments_crud.update_comment(db, db_comment, comment)
+    
+    # Handle Mentions for updated content
+    mentioned_users = mentions_crud.extract_mentions(comment.content)
+    if mentioned_users:
+        mentions_crud.create_mentions(db, mentioned_users, comment_id=comment_id)
+    
+    return updated_comment
 
 @router.delete("/{comment_id}")
 async def delete_comment(

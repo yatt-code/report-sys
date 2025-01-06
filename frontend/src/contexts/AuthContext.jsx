@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
+    // Send email as username to match FastAPI's OAuth2PasswordRequestForm
     const { access_token } = await auth.login(email, password);
     localStorage.setItem('token', access_token);
     const userData = await auth.me();

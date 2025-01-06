@@ -1,7 +1,9 @@
 from fastapi import FastAPI
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+
 
 from app.routers import auth, reports, comments
 from app.core.database import Base, engine

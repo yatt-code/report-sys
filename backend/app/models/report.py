@@ -16,3 +16,5 @@ class Report(Base):
     user = relationship("User", back_populates="reports")
     attachments = relationship("Attachment", back_populates="report")
     comments = relationship("Comment", back_populates="report")
+    mentions = relationship("Mention", back_populates="report")
+    

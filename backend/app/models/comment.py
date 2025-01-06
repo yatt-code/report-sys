@@ -15,6 +15,7 @@ class Comment(Base):
 
     user = relationship("User", back_populates="comments")
     report = relationship("Report", back_populates="comments")
+    mentions = relationship("Mention", back_populates="comment")
     
     # Corrected self-referential relationship
     replies = relationship(

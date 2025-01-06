@@ -18,16 +18,19 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def authenticate_user(db: Session, username: str, password: str) -> Union[User, None]:
-    user = db.query(User).filter(
-        (User.email == username) | (User.username == username)
-    ).first()
+def authenticate_user(db: Session, username: str, password: str, use_email: bool = False) -> Union[User, None]:
+    if use_email:
+        user = db.query(User).filter(User.email == username).first()
+    else:
+        user = db.query(User).filter(
+            (User.email == username) | (User.username == username)
+        ).first()
     if not user or not verify_password(password, user.hashed_password):
         return None
     return user
 
-def create_access_token(*, data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
+def create_access_token(*, user_id: int, expires_delta: timedelta | None = None) -> str:
+    to_encode = {"sub": str(user_id)}
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:

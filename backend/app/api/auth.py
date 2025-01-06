@@ -57,16 +57,18 @@ async def login(
     """
     OAuth2 compatible token login, get an access token for future requests.
     """
-    user = authenticate_user(db, form_data.username, form_data.password)
+    # Convert email to lowercase for case-insensitive login
+    email = form_data.username.lower()
+    user = authenticate_user(db, email, form_data.password, use_email=True)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email}, 
+        user_id=user.id,
         expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}

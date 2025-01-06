@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_active_user
 from app.core.storage import save_upload_file
 from app.crud import reports as reports_crud
+from app.crud import mentions as mentions_crud
 from app.models.user import User
 from app.schemas.report import (
     ReportCreate,
@@ -23,7 +24,14 @@ async def create_report(
     current_user: User = Depends(get_current_active_user)
 ) -> Any:
     """Create a new report."""
-    return reports_crud.create_report(db, report, current_user)
+    db_report = reports_crud.create_report(db, report, current_user)
+
+    # Handle Mentions
+    mentioned_users = mentions_crud.extract_mentions(report.content)
+    if mentioned_users:
+        mentions_crud.create_mentions(db, mentioned_users, report_id=db_report.id)
+    
+    return db_report
 
 @router.get("", response_model=ReportListResponse)
 async def get_reports(
@@ -73,7 +81,14 @@ async def update_report(
     if db_report.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to modify this report")
     
-    return reports_crud.update_report(db, db_report, report)
+    updated_report = reports_crud.update_report(db, db_report, report)
+    
+    # Handle Mentions for updated content
+    mentioned_users = mentions_crud.extract_mentions(report.content)
+    if mentioned_users:
+        mentions_crud.create_mentions(db, mentioned_users, report_id=report_id)
+    
+    return updated_report
 
 @router.delete("/{report_id}")
 async def delete_report(

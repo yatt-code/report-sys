@@ -39,18 +39,16 @@ api.interceptors.response.use(
 
 // Auth API
 export const auth = {
-  login: async (credentials, useJson = true) => {
+  login: async (email, password) => {
     try {
-      const payload = useJson
-        ? { username: credentials.email, password: credentials.password }
-        : new URLSearchParams({
-            username: credentials.email,
-            password: credentials.password,
-          });
+      const payload = new URLSearchParams({
+        username: email,
+        password: password,
+      });
 
-      const headers = useJson
-        ? { 'Content-Type': 'application/json' }
-        : { 'Content-Type': 'application/x-www-form-urlencoded' };
+      const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
 
       const response = await api.post('/api/auth/login', payload, { headers });
 

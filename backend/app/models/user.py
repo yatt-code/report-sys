@@ -16,3 +16,4 @@ class User(Base):
 
     reports = relationship("Report", back_populates="user")
     comments = relationship("Comment", back_populates="user")
+    mentions = relationship("Mention", back_populates="user")
