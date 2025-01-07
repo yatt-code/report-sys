@@ -51,6 +51,9 @@ export function AuthProvider({ children }) {
       return login(userData.email, userData.password);
     } catch (error) {
       console.error('Signup error:', error);
+      if (error.response?.status === 404) {
+        throw new Error('Registration endpoint not found. Please contact support.');
+      }
       throw error;
     }
   };

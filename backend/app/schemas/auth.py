@@ -17,8 +17,12 @@ class UserBase(BaseModel):
             )
         return v
 
-class UserCreate(UserBase):
-    password: constr(min_length=8)
+class UserCreate(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
+    full_name: str
+    role: UserRole = UserRole.ANALYST  # Default role for new users
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None

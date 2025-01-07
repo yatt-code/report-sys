@@ -34,7 +34,7 @@ export const auth = {
   },
 
   signup: async (userData) => {
-    const { data } = await api.post('/auth/signup', userData);
+    const { data } = await api.post('/auth/register', userData);
     return data;
   },
 
